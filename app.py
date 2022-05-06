@@ -76,7 +76,8 @@ def stations():
     stations = list(np.ravel(results))
     return jsonify(stations=stations)
 
-#8.5.5
+
+#9.5.5
 #Build the fourth route (Temperature observations)
 @app.route("/api/v1.0/tobs")
 def temp_monthly():
@@ -86,3 +87,33 @@ def temp_monthly():
         filter(Measurement.date >= prev_year).all()
     temps = list(np.ravel(results))
     return jsonify(temps=temps)
+
+
+#9.5.6
+#Build the fifth route (Summary statistics report)
+#Provide both a starting and ending date
+@app.route("/api/v1.0/temp/<start>")
+@app.route("/api/v1.0/temp/<start>/<end>")
+
+#Add parameters to our stats()function
+def starts(start=None, end=None):
+#Create a query to select the minimum, average, and maximum temperatures from our SQLite database   
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+    
+    #Since we need to determine the starting and ending date, add an if-not statement to our code. 
+    #We'll need to query our database using the list that we just made. 
+    #Then, we'll unravel the results into a one-dimensional array and convert them to a list. 
+    #Finally, we will jsonify our results and return them.
+    #The asterisk is used to indicate there will be multiple results for our query: minimum, average, and maximum temperatures.
+    
+    if not end:
+        results = session.query(*sel).\
+            filter(Measurement.date >= start).all()
+        temps = list(np.ravel(results))
+        return jsonify(temps=temps)
+    
+    results = session.query(*sel).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+    temps = list(np.ravel(results))
+    return jsonify(temps)
