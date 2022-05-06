@@ -57,7 +57,7 @@ def welcome():
 
 
 #9.5.3
-#Build a second route (Precipitation analysis)
+#Build the second route (Precipitation analysis)
 #Make sure that it's aligned all the way to the left as this is a new route
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -66,3 +66,23 @@ def precipitation():
         filter(Measurement.date >= prev_year).all()
     precip = {date: prcp for date, prcp in precipitation}
     return jsonify(precip)
+
+
+#9.5.4
+#Build the third route (Stations analysis)
+@app.route("/api/v1.0/stations")
+def stations():
+    results = session.query(Station.station).all()
+    stations = list(np.ravel(results))
+    return jsonify(stations=stations)
+
+#8.5.5
+#Build the fourth route (Temperature observations)
+@app.route("/api/v1.0/tobs")
+def temp_monthly():
+    prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+    results = session.query(Measurement.tobs).\
+        filter(Measurement.station == 'USC00519281').\
+        filter(Measurement.date >= prev_year).all()
+    temps = list(np.ravel(results))
+    return jsonify(temps=temps)
